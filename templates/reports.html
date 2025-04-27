@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">Reports</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sales Report Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-line text-primary me-2"></i>Sales Report
+                    </h5>
+                    <p class="card-text">View detailed sales transactions with filters by date, party, and product.</p>
+                    <a href="{{ url_for('sales_report') }}" class="btn btn-primary">
+                        <i class="fas fa-file-alt me-2"></i>View Sales Report
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase Report Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-shopping-cart text-success me-2"></i>Purchase Report
+                    </h5>
+                    <p class="card-text">View detailed purchase transactions with filters by date, party, and product.</p>
+                    <a href="{{ url_for('purchase_report') }}" class="btn btn-success">
+                        <i class="fas fa-file-alt me-2"></i>View Purchase Report
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Party-wise Report Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-users text-info me-2"></i>Party-wise Report
+                    </h5>
+                    <p class="card-text">View transactions grouped by party with summary statistics.</p>
+                    <a href="{{ url_for('party_wise_report') }}" class="btn btn-info">
+                        <i class="fas fa-file-alt me-2"></i>View Party-wise Report
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product-wise Report Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-box text-warning me-2"></i>Product-wise Report
+                    </h5>
+                    <p class="card-text">View transactions grouped by product with summary statistics.</p>
+                    <a href="{{ url_for('product_wise_report') }}" class="btn btn-warning">
+                        <i class="fas fa-file-alt me-2"></i>View Product-wise Report
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- GST Report Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-file-invoice-dollar text-danger me-2"></i>GST Report
+                    </h5>
+                    <p class="card-text">View GST summary and details for all transactions.</p>
+                    <a href="{{ url_for('gst_report') }}" class="btn btn-danger">
+                        <i class="fas fa-file-alt me-2"></i>View GST Report
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Price Analysis Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-bar text-primary me-2"></i>Price Analysis
+                    </h5>
+                    <p class="card-text">Analyze product prices over time with interactive charts and party-wise comparisons.</p>
+                    <a href="{{ url_for('price_analysis') }}" class="btn btn-primary">
+                        <i class="fas fa-file-alt me-2"></i>View Price Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- GSTR-3B Report Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-file-contract text-success me-2"></i>GSTR-3B Report
+                    </h5>
+                    <p class="card-text">Generate monthly GSTR-3B report with outward supplies, ITC details, and HSN summary.</p>
+                    <a href="{{ url_for('gstr3b_report') }}" class="btn btn-success">
+                        <i class="fas fa-file-alt me-2"></i>View GSTR-3B Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

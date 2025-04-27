@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Incoming Bill{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Incoming Bill</h2>
+    <form method="POST" id="billForm">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label for="inv_id" class="form-label">Invoice ID</label>
+                <input type="text" class="form-control" id="inv_id" name="inv_id" value="{{ bill.inv_id }}" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="party_id" class="form-label">Party</label>
+                <select class="form-select" id="party_id" name="party_id" required>
+                    <option value="">Select Party</option>
+                    {% for party in parties %}
+                    <option value="{{ party.p_id }}" {% if party.p_id == bill.party_id %}selected{% endif %}>
+                        {{ party.party }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="bill_date" class="form-label">Bill Date</label>
+                <input type="date" class="form-control" id="bill_date" name="bill_date" value="{{ bill.bill_date }}" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="account_id" class="form-label">Account</label>
+                <select class="form-select" id="account_id" name="account_id">
+                    <option value="">Select Account</option>
+                    {% for account in accounts %}
+                    <option value="{{ account.a_id }}" {% if account.a_id == bill.account_id %}selected{% endif %}>
+                        {{ account.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="tds_percentage" class="form-label">TDS Percentage</label>
+                <input type="number" step="0.01" class="form-control" id="tds_percentage" name="tds_percentage" 
+                       value="{{ bill.tds_percent|default(0, true) }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="discount_percent" class="form-label">Discount Percentage</label>
+                <input type="number" step="0.01" class="form-control" id="discount_percent" name="discount_percent" 
+                       value="{{ bill.discount_percent|default(0, true) }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="remarks" class="form-label">Remarks</label>
+                <input type="text" class="form-control" id="remarks" name="remarks" value="{{ bill.remarks|default('', true) }}">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered" id="itemsTable">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Rate</th>
+                        <th>GST %</th>
+                        <th>Sub Total</th>
+                        <th>GST Amount</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            <select class="form-select product-select" name="items[]" required>
+                                <option value="">Select Product</option>
+                                {% for product in products %}
+                                <option value="{{ product.prod_id }}" {% if product.prod_id == item.product_id %}selected{% endif %}>
+                                    {{ product.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" class="form-control qty" name="item_{{ loop.index0 }}[]" 
+                                   value="{{ item.qty }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" class="form-control rate" name="item_{{ loop.index0 }}[]" 
+                                   value="{{ item.rate }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" class="form-control gst" name="item_{{ loop.index0 }}[]" 
+                                   value="{{ item.gst_percent }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" class="form-control sub-total" value="{{ item.sub_total }}" readonly>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" class="form-control gst-amount" 
+                                   value="{{ item.sgst_amount + item.cgst_amount }}" readonly>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" class="form-control total" value="{{ item.total_amount }}" readonly>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm delete-row">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col">
+                <button type="button" class="btn btn-primary" id="addRow">Add Item</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <button type="submit" class="btn btn-success">Update Bill</button>
+                <a href="{{ url_for('incoming_bills') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-sm">
+                    <tr>
+                        <td>Sub Total:</td>
+                        <td class="text-end"><span id="finalSubTotal">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td>Discount Amount:</td>
+                        <td class="text-end"><span id="discountAmount">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td>Total GST:</td>
+                        <td class="text-end"><span id="totalGST">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td>TDS Amount:</td>
+                        <td class="text-end"><span id="tdsAmount">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Final Amount:</strong></td>
+                        <td class="text-end"><strong><span id="finalAmount">0.00</span></strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const itemsTable = document.getElementById('itemsTable');
+    const addRowBtn = document.getElementById('addRow');
+    
+    // Function to create a new row
+    function createNewRow() {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <select class="form-select product-select" name="items[]" required>
+                    <option value="">Select Product</option>
+                    {% for product in products %}
+                    <option value="{{ product.prod_id }}">{{ product.name }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="number" step="0.01" class="form-control qty" name="item_${itemsTable.rows.length-1}[]" required></td>
+            <td><input type="number" step="0.01" class="form-control rate" name="item_${itemsTable.rows.length-1}[]" required></td>
+            <td><input type="number" step="0.01" class="form-control gst" name="item_${itemsTable.rows.length-1}[]" required></td>
+            <td><input type="number" step="0.01" class="form-control sub-total" readonly></td>
+            <td><input type="number" step="0.01" class="form-control gst-amount" readonly></td>
+            <td><input type="number" step="0.01" class="form-control total" readonly></td>
+            <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
+        `;
+        itemsTable.querySelector('tbody').appendChild(row);
+        attachRowEventListeners(row);
+    }
+
+    // Function to attach event listeners to a row
+    function attachRowEventListeners(row) {
+        const qtyInput = row.querySelector('.qty');
+        const rateInput = row.querySelector('.rate');
+        const gstInput = row.querySelector('.gst');
+        const deleteBtn = row.querySelector('.delete-row');
+
+        [qtyInput, rateInput, gstInput].forEach(input => {
+            input.addEventListener('input', calculateRowTotal);
+        });
+
+        deleteBtn.addEventListener('click', function() {
+            row.remove();
+            updateTotals();
+        });
+    }
+
+    // Function to calculate row totals
+    function calculateRowTotal() {
+        const row = this.closest('tr');
+        const qty = parseFloat(row.querySelector('.qty').value) || 0;
+        const rate = parseFloat(row.querySelector('.rate').value) || 0;
+        const gstPercent = parseFloat(row.querySelector('.gst').value) || 0;
+
+        const subTotal = qty * rate;
+        row.querySelector('.sub-total').value = subTotal.toFixed(2);
+
+        const gstAmount = (subTotal * gstPercent) / 100;
+        row.querySelector('.gst-amount').value = gstAmount.toFixed(2);
+
+        const total = subTotal + gstAmount;
+        row.querySelector('.total').value = total.toFixed(2);
+
+        updateTotals();
+    }
+
+    // Function to update all totals
+    function updateTotals() {
+        let subTotal = 0;
+        let totalGST = 0;
+        
+        document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
+            subTotal += parseFloat(row.querySelector('.sub-total').value) || 0;
+            totalGST += parseFloat(row.querySelector('.gst-amount').value) || 0;
+        });
+
+        const discountPercent = parseFloat(document.getElementById('discount_percent').value) || 0;
+        const tdsPercent = parseFloat(document.getElementById('tds_percentage').value) || 0;
+
+        const discountAmount = (subTotal * discountPercent) / 100;
+        const subTotalAfterDiscount = subTotal - discountAmount;
+        const tdsAmount = (subTotalAfterDiscount * tdsPercent) / 100;
+        const finalAmount = subTotalAfterDiscount + totalGST - tdsAmount;
+
+        document.getElementById('finalSubTotal').textContent = subTotal.toFixed(2);
+        document.getElementById('discountAmount').textContent = discountAmount.toFixed(2);
+        document.getElementById('totalGST').textContent = totalGST.toFixed(2);
+        document.getElementById('tdsAmount').textContent = tdsAmount.toFixed(2);
+        document.getElementById('finalAmount').textContent = finalAmount.toFixed(2);
+    }
+
+    // Add event listeners to existing rows
+    document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
+        attachRowEventListeners(row);
+    });
+
+    // Add event listener to the Add Item button
+    addRowBtn.addEventListener('click', createNewRow);
+
+    // Add event listeners to TDS and Discount percentage inputs
+    document.getElementById('tds_percentage').addEventListener('input', updateTotals);
+    document.getElementById('discount_percent').addEventListener('input', updateTotals);
+
+    // Initial calculation of totals
+    updateTotals();
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Payment{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Edit Payment</h2>
+        <a href="{{ url_for('view_payments') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to List
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="payment_type" class="form-label">Payment Type</label>
+                            <select class="form-select" id="payment_type" name="payment_type" required>
+                                <option value="vendor" {% if payment.payment_type == 'vendor' %}selected{% endif %}>Vendor Payment</option>
+                                <option value="misc" {% if payment.payment_type == 'misc' %}selected{% endif %}>Miscellaneous Payment</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="vendor_section" {% if payment.payment_type != 'vendor' %}style="display: none;"{% endif %}>
+                            <label for="vendor_id" class="form-label">Vendor</label>
+                            <select class="form-select" id="vendor_id" name="vendor_id">
+                                <option value="">Select Vendor</option>
+                                {% for vendor in vendors %}
+                                <option value="{{ vendor.p_id }}" {% if payment.vendor_id == vendor.p_id %}selected{% endif %}>
+                                    {{ vendor.party }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="misc_section" {% if payment.payment_type == 'vendor' %}style="display: none;"{% endif %}>
+                            <label for="payment_for" class="form-label">Payment For</label>
+                            <input type="text" class="form-control" id="payment_for" name="payment_for" 
+                                   value="{{ payment.payment_for or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="payment_date" class="form-label">Payment Date</label>
+                            <input type="date" class="form-control" id="payment_date" name="payment_date" 
+                                   value="{{ payment.payment_date.strftime('%Y-%m-%d') }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="payment_mode" class="form-label">Payment Mode</label>
+                            <select class="form-select" id="payment_mode" name="payment_mode" required>
+                                <option value="cash" {% if payment.payment_mode == 'cash' %}selected{% endif %}>Cash</option>
+                                <option value="cheque" {% if payment.payment_mode == 'cheque' %}selected{% endif %}>Cheque</option>
+                                <option value="online" {% if payment.payment_mode == 'online' %}selected{% endif %}>Online</option>
+                                <option value="upi" {% if payment.payment_mode == 'upi' %}selected{% endif %}>UPI</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <input type="number" step="0.01" class="form-control" id="amount" name="amount" 
+                                   value="{{ "%.2f"|format(payment.amount) }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="narration" class="form-label">Narration</label>
+                            <textarea class="form-control" id="narration" name="narration" rows="2">{{ payment.narration or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Update Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#payment_type').change(function() {
+            if ($(this).val() === 'vendor') {
+                $('#vendor_section').show();
+                $('#misc_section').hide();
+                $('#vendor_id').prop('required', true);
+                $('#payment_for').prop('required', false);
+            } else {
+                $('#vendor_section').hide();
+                $('#misc_section').show();
+                $('#vendor_id').prop('required', false);
+                $('#payment_for').prop('required', true);
+            }
+        });
+    });
+</script>
+{% endblock %} 

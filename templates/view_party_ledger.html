@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Party Ledger - {{ party.party }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Party Ledger - {{ party.party }}</h2>
+        <div>
+            <a href="{{ url_for('record_payment', vendor_id=party.p_id) }}" class="btn btn-primary me-2">
+                <i class="fas fa-money-bill-wave me-1"></i>Record Payment
+            </a>
+            <a href="{{ url_for('party_ledger') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Purchases</h5>
+                    <p class="card-text">
+                        Count: {{ summary.total_purchases }}<br>
+                        Amount: ₹{{ "%.2f"|format(summary.total_purchase_amount) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Sales</h5>
+                    <p class="card-text">
+                        Count: {{ summary.total_sales }}<br>
+                        Amount: ₹{{ "%.2f"|format(summary.total_sales_amount) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Payments</h5>
+                    <p class="card-text">
+                        Count: {{ summary.total_payments }}<br>
+                        Amount: ₹{{ "%.2f"|format(summary.total_payment_amount) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Balance</h5>
+                    <p class="card-text">
+                        {% if summary.net_balance < 0 %}
+                            <span class="text-danger">We Owe: ₹{{ "%.2f"|format(summary.net_balance|abs) }}</span>
+                        {% elif summary.net_balance > 0 %}
+                            <span class="text-success">They Owe: ₹{{ "%.2f"|format(summary.net_balance) }}</span>
+                        {% else %}
+                            <span class="text-info">Settled: ₹0.00</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="transactionsTable" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Reference No</th>
+                            <th>Mode</th>
+                            <th class="text-end">Amount</th>
+                            <th class="text-end">Balance</th>
+                            <th>Narration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in transactions %}
+                        <tr>
+                            <td>{{ txn.transaction_date.strftime('%d-%m-%Y') }}</td>
+                            <td>
+                                {% if txn.transaction_type == 'Purchase' %}
+                                    <span class="badge bg-danger">Purchase</span>
+                                {% elif txn.transaction_type == 'Sale' %}
+                                    <span class="badge bg-success">Sale</span>
+                                {% else %}
+                                    <span class="badge bg-info">Payment</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if txn.transaction_type == 'Purchase' %}
+                                    <a href="{{ url_for('view_bill', s_no=txn.s_no) }}">{{ txn.reference_no }}</a>
+                                {% elif txn.transaction_type == 'Sale' %}
+                                    <a href="{{ url_for('view_outgoing_bill', s_no=txn.s_no) }}">{{ txn.reference_no }}</a>
+                                {% else %}
+                                    {{ txn.reference_no }}
+                                {% endif %}
+                            </td>
+                            <td>{{ txn.payment_mode|title if txn.payment_mode else '-' }}</td>
+                            <td class="text-end {% if txn.amount < 0 %}text-danger{% else %}text-success{% endif %}">
+                                ₹{{ "%.2f"|format(txn.amount|abs) }}
+                            </td>
+                            <td class="text-end {% if txn.running_balance < 0 %}text-danger{% else %}text-success{% endif %}">
+                                ₹{{ "%.2f"|format(txn.running_balance|abs) }}
+                            </td>
+                            <td>{{ txn.narration or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#transactionsTable').DataTable({
+            order: [[0, 'desc']],
+            pageLength: 25,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ]
+        });
+    });
+</script>
+{% endblock %} 

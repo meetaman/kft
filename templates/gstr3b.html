@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}GSTR-3B Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">GSTR-3B Report</h2>
+                <div>
+                    {% if month %}
+                    <a href="{{ url_for('download_gstr3b_report', month=month) }}" class="btn btn-success me-2">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('reports') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Select Period</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('gstr3b_report') }}" class="row g-3">
+                <div class="col-md-4">
+                    <label for="month" class="form-label">Month</label>
+                    <input type="month" class="form-control" id="month" name="month" value="{{ month }}" required>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3.1 Outward Supplies -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">3.1 Details of Outward Supplies and inward supplies liable to reverse charge</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nature of Supplies</th>
+                            <th class="text-end">Total Taxable Value</th>
+                            <th class="text-end">Integrated Tax</th>
+                            <th class="text-end">Central Tax</th>
+                            <th class="text-end">State/UT Tax</th>
+                            <th class="text-end">Cess</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(a) Outward taxable supplies (other than zero rated, nil rated and exempted)</td>
+                            <td class="text-end">₹{{ "%.2f"|format(outward_supplies.registered_taxable_value) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(outward_supplies.registered_igst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(outward_supplies.registered_cgst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(outward_supplies.registered_sgst) }}</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(b) Outward taxable supplies (zero rated)</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(c) Other outward supplies (Nil rated, exempted)</td>
+                            <td class="text-end">₹{{ "%.2f"|format(outward_supplies.unregistered_taxable_value) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(outward_supplies.unregistered_igst) }}</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(d) Inward supplies (liable to reverse charge)</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(e) Non-GST outward supplies</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3.2 Inter-State Supplies -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">3.2 Of the supplies shown in 3.1 (a) above, details of inter-State supplies made to unregistered persons, composition taxable persons and UIN holders</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-end">Place of Supply (State/UT)</th>
+                            <th class="text-end">Total Taxable Value</th>
+                            <th class="text-end">Amount of Integrated Tax</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Supplies made to Unregistered Persons</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">₹{{ "%.2f"|format(outward_supplies.unregistered_taxable_value) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(outward_supplies.unregistered_igst) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Supplies made to Composition Taxable Persons</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Supplies made to UIN holders</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Eligible ITC -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">4. Eligible ITC</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Details</th>
+                            <th class="text-end">Integrated Tax</th>
+                            <th class="text-end">Central Tax</th>
+                            <th class="text-end">State/UT Tax</th>
+                            <th class="text-end">Cess</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) ITC Available (whether in full or part)</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_igst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_cgst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_sgst) }}</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(1) Import of goods</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(2) Import of services</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(3) Inward supplies liable to reverse charge (other than 1 & 2 above)</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(4) Inward supplies from ISD</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(5) All other ITC</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_igst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_cgst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_sgst) }}</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(B) ITC Reversed</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>(C) Net ITC Available (A) - (B)</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_igst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_cgst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_sgst) }}</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Values of exempt, nil-rated and non-GST inward supplies -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">5. Values of exempt, nil-rated and non-GST inward supplies</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nature of supplies</th>
+                            <th class="text-end">Inter-State supplies</th>
+                            <th class="text-end">Intra-State supplies</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>From a supplier under composition scheme, Exempt and Nil rated supply</td>
+                            <td class="text-end">₹{{ "%.2f"|format(exempt_supplies.exempt_supplies) }}</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Non GST supply</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6.1 Payment of Tax -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">6.1 Payment of Tax</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-end">Integrated Tax</th>
+                            <th class="text-end">Central Tax</th>
+                            <th class="text-end">State/UT Tax</th>
+                            <th class="text-end">Cess</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Tax Payable</td>
+                            <td class="text-end">₹{{ "%.2f"|format(tax_payment.total_amount) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(tax_payment.total_cgst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(tax_payment.total_sgst) }}</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Tax paid through ITC</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_igst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_cgst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(eligible_itc.total_sgst) }}</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Tax paid in cash</td>
+                            <td class="text-end">₹{{ "%.2f"|format(tax_payment.total_amount - eligible_itc.total_igst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(tax_payment.total_cgst - eligible_itc.total_cgst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(tax_payment.total_sgst - eligible_itc.total_sgst) }}</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Interest</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Late Fee</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6.2 TDS/TCS Credit -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">6.2 TDS/TCS Credit</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-end">Integrated Tax</th>
+                            <th class="text-end">Central Tax</th>
+                            <th class="text-end">State/UT Tax</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>TDS</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹{{ "%.2f"|format(tds_credit.total_tds/2) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(tds_credit.total_tds/2) }}</td>
+                        </tr>
+                        <tr>
+                            <td>TCS</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- HSN Summary -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">HSN-wise Summary of Outward Supplies</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>HSN</th>
+                            <th>Description</th>
+                            <th class="text-end">UQC</th>
+                            <th class="text-end">Total Quantity</th>
+                            <th class="text-end">Total Value</th>
+                            <th class="text-end">Rate</th>
+                            <th class="text-end">Taxable Value</th>
+                            <th class="text-end">Integrated Tax</th>
+                            <th class="text-end">Central Tax</th>
+                            <th class="text-end">State/UT Tax</th>
+                            <th class="text-end">Cess</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in hsn_summary %}
+                        <tr>
+                            <td>{{ item.hsn_code }}</td>
+                            <td>{{ item.product_name }}</td>
+                            <td class="text-end">NOS</td>
+                            <td class="text-end">{{ "%.2f"|format(item.total_quantity) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.total_value) }}</td>
+                            <td class="text-end">{{ item.gst_percent }}%</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.total_value) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.total_igst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.total_cgst) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.total_sgst) }}</td>
+                            <td class="text-end">₹0.00</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

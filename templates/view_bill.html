@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}View Bill - {{ bill.inv_id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Bill Details - {{ bill.inv_id }}</h2>
+        <div>
+            <a href="{{ url_for('record_payment', vendor_id=bill.party_id) }}" class="btn btn-primary me-2">
+                <i class="fas fa-money-bill-wave me-1"></i>Record Payment
+            </a>
+            <a href="{{ url_for('incoming_bills') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Bill Information</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%">Invoice ID:</th>
+                                    <td>{{ bill.inv_id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date:</th>
+                                    <td>{{ bill.bill_date.strftime('%d-%m-%Y') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Party:</th>
+                                    <td>{{ bill.party_name }}</td>
+                                </tr>
+                                {% if bill.account_name %}
+                                <tr>
+                                    <th>Account:</th>
+                                    <td>{{ bill.account_name }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if bill.remarks %}
+                                <tr>
+                                    <th>Remarks:</th>
+                                    <td>{{ bill.remarks }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%">Total GST:</th>
+                                    <td>₹{{ "%.2f"|format(bill.total_gst) }}</td>
+                                </tr>
+                                {% if bill.discount_percent and bill.discount_percent > 0 %}
+                                <tr>
+                                    <th>Discount:</th>
+                                    <td>{{ "%.2f"|format(bill.discount_percent) }}% (₹{{ "%.2f"|format(bill.discount_amount) }})</td>
+                                </tr>
+                                {% endif %}
+                                {% if bill.tds_percent and bill.tds_percent > 0 %}
+                                <tr>
+                                    <th>TDS:</th>
+                                    <td>{{ "%.2f"|format(bill.tds_percent) }}% (₹{{ "%.2f"|format(bill.tds_amount) }})</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th>Final Amount:</th>
+                                    <td>₹{{ "%.2f"|format(bill.final_amount) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Paid Amount:</th>
+                                    <td>₹{{ "%.2f"|format(bill.total_payments) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Pending Amount:</th>
+                                    <td class="{% if bill.pending_amount and bill.pending_amount > 0 %}text-danger{% else %}text-success{% endif %}">
+                                        ₹{{ "%.2f"|format(bill.pending_amount|abs) }}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Bill Items</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-end">Quantity</th>
+                            <th class="text-end">Rate</th>
+                            <th class="text-end">Sub Total</th>
+                            <th class="text-end">GST %</th>
+                            <th class="text-end">SGST</th>
+                            <th class="text-end">CGST</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.product_name }}</td>
+                            <td class="text-end">{{ "%.2f"|format(item.qty) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.rate) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.sub_total) }}</td>
+                            <td class="text-end">{{ "%.2f"|format(item.gst_percent) }}%</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.sgst_amount) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.cgst_amount) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.total_amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> 

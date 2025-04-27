@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payment{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Record Payment</h2>
+        <a href="{{ url_for('view_payments') }}" class="btn btn-secondary">View All Payments</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" id="paymentForm">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="payment_type" class="form-label">Payment Type</label>
+                        <select class="form-select" id="payment_type" name="payment_type" required>
+                            <option value="vendor">Vendor Payment</option>
+                            <option value="misc">Miscellaneous Payment</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="payment_date" class="form-label">Payment Date</label>
+                        <input type="date" class="form-control" id="payment_date" name="payment_date" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div id="vendorField">
+                            <label for="vendor_id" class="form-label">Vendor</label>
+                            <select class="form-select" id="vendor_id" name="vendor_id">
+                                <option value="">Select Vendor</option>
+                                {% for vendor in vendors %}
+                                <option value="{{ vendor.p_id }}">{{ vendor.party }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="miscField" style="display: none;">
+                            <label for="payment_for" class="form-label">Payment Description</label>
+                            <input type="text" class="form-control" id="payment_for" name="payment_for">
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="categoryField" style="display: none;">
+                        <label for="category" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="category" name="category">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="payment_mode" class="form-label">Payment Mode</label>
+                        <select class="form-select" id="payment_mode" name="payment_mode" required>
+                            <option value="cash">Cash</option>
+                            <option value="bank">Bank</option>
+                            <option value="upi">UPI</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="narration" class="form-label">Narration</label>
+                        <textarea class="form-control" id="narration" name="narration" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Record Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Function to toggle payment fields
+        function togglePaymentFields(paymentType) {
+            if (paymentType === 'vendor') {
+                $('#vendorField').show();
+                $('#miscField').hide();
+                $('#categoryField').hide();
+                $('#vendor_id').prop('required', true);
+                $('#payment_for').prop('required', false);
+            } else {
+                $('#vendorField').hide();
+                $('#miscField').show();
+                $('#categoryField').show();
+                $('#vendor_id').prop('required', false);
+                $('#payment_for').prop('required', true);
+            }
+        }
+
+        // Initialize Select2 for vendor dropdown
+        $('#vendor_id').select2({
+            placeholder: 'Select Vendor',
+            width: '100%'
+        });
+
+        // Handle payment type change
+        $('#payment_type').change(function() {
+            togglePaymentFields($(this).val());
+        });
+
+        // Set initial state
+        togglePaymentFields($('#payment_type').val());
+
+        // Set today's date as default
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var yyyy = today.getFullYear();
+        today = yyyy + '-' + mm + '-' + dd;
+        $('#payment_date').val(today);
+    });
+</script>
+{% endblock %} 
